@@ -1,0 +1,2186 @@
+{
+  "name": "College Bot-action",
+  "type": "action",
+  "counts": {
+    "actions": 8,
+    "intents": 5,
+    "entities": 6,
+    "data_types": 0,
+    "collections": 0,
+    "global_variables": 1
+  },
+  "status": "Available",
+  "language": "en",
+  "skill_id": "0e747da6-5d1c-42dc-96a6-80dbb5ba1357",
+  "workspace": {
+    "actions": [
+      {
+        "type": "standard",
+        "steps": [
+          {
+            "step": "danger_word_detected",
+            "title": "Connect to agent",
+            "handlers": [],
+            "resolver": {
+              "type": "fallback"
+            },
+            "variable": "danger_word_detected_variable",
+            "condition": {
+              "entity": "danger_words"
+            },
+            "next_step": "profanity_detected"
+          },
+          {
+            "step": "profanity_detected",
+            "title": "Show warning",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "Please use appropriate language when interacting with the assistant."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [
+              {
+                "type": "max_hits",
+                "handler": "max_hits_handler",
+                "resolver": {
+                  "type": "fallback"
+                }
+              }
+            ],
+            "max_hits": 2,
+            "resolver": {
+              "type": "end_action"
+            },
+            "variable": "profanity_detected_variable",
+            "condition": {
+              "entity": "profane_words"
+            }
+          }
+        ],
+        "title": "Trigger word detected",
+        "action": "run_always",
+        "boosts": [],
+        "handlers": [],
+        "variables": [
+          {
+            "title": "Profanity detected",
+            "variable": "danger_word_detected_variable",
+            "data_type": "any"
+          },
+          {
+            "title": "Profane word detected",
+            "variable": "profanity_detected_variable",
+            "data_type": "any"
+          }
+        ],
+        "next_action": "anything_else"
+      },
+      {
+        "type": "standard",
+        "steps": [
+          {
+            "step": "step_001",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": "I'm afraid I don't understand. Please rephrase your question."
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "end_action"
+            },
+            "variable": "step_001",
+            "condition": {
+              "lte": [
+                {
+                  "system_variable": "no_action_matches_count"
+                },
+                {
+                  "scalar": 3
+                }
+              ]
+            },
+            "next_step": "step_002"
+          },
+          {
+            "step": "step_002",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": ""
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "invoke_another_action_and_end",
+              "invoke_action": {
+                "action": "fallback",
+                "policy": "default",
+                "parameters": null,
+                "result_variable": "step_002_result_1"
+              }
+            },
+            "variable": "step_002",
+            "condition": {
+              "gt": [
+                {
+                  "system_variable": "no_action_matches_count"
+                },
+                {
+                  "scalar": 3
+                }
+              ]
+            }
+          }
+        ],
+        "title": "No matches",
+        "action": "anything_else",
+        "boosts": [],
+        "handlers": [],
+        "condition": {
+          "expression": "anything_else"
+        },
+        "variables": [
+          {
+            "title": "I am afraid I do not understand what you are asking, please re-p",
+            "variable": "step_001",
+            "data_type": "any"
+          },
+          {
+            "variable": "step_002",
+            "data_type": "any"
+          },
+          {
+            "variable": "step_002_result_1",
+            "data_type": "any"
+          }
+        ],
+        "disambiguation_opt_out": true
+      },
+      {
+        "type": "standard",
+        "steps": [
+          {
+            "step": "digression_failure",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": "Sorry I couldn't confirm if you wanted to return to previous topic, let me connect to an agent."
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "connect_to_agent",
+              "response": {
+                "transfer_info": {
+                  "target": {}
+                },
+                "agent_available": {
+                  "message": "Let's send you to an available agent."
+                },
+                "agent_unavailable": {
+                  "message": "There are no agents available at this time. When one becomes available, we'll connect you."
+                },
+                "message_to_human_agent": ""
+              }
+            },
+            "variable": "digression_failure",
+            "condition": {
+              "eq": [
+                {
+                  "system_variable": "fallback_reason"
+                },
+                {
+                  "scalar": "Failed to confirm topic return"
+                }
+              ]
+            },
+            "next_step": "step_001"
+          },
+          {
+            "step": "step_001",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": "I'm afraid I don't understand. I can connect you to an agent."
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "connect_to_agent",
+              "response": {
+                "transfer_info": {
+                  "target": {}
+                },
+                "agent_available": {
+                  "message": "Let's send you to an available agent."
+                },
+                "agent_unavailable": {
+                  "message": "There are no agents available at this time. When one becomes available, we'll connect you."
+                },
+                "message_to_human_agent": ""
+              }
+            },
+            "variable": "step_001",
+            "condition": {
+              "eq": [
+                {
+                  "system_variable": "fallback_reason"
+                },
+                {
+                  "scalar": "Step validation failed"
+                }
+              ]
+            },
+            "next_step": "step_002"
+          },
+          {
+            "step": "step_002",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": "Sorry I couldn't assist you. I will connect you to an agent right away."
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "connect_to_agent",
+              "response": {
+                "transfer_info": {
+                  "target": {}
+                },
+                "agent_available": {
+                  "message": "Let's send you to an available agent."
+                },
+                "agent_unavailable": {
+                  "message": "There are no agents available at this time. When one becomes available, we'll connect you."
+                },
+                "message_to_human_agent": ""
+              }
+            },
+            "variable": "step_002",
+            "condition": {
+              "eq": [
+                {
+                  "system_variable": "fallback_reason"
+                },
+                {
+                  "scalar": "Agent requested"
+                }
+              ]
+            },
+            "next_step": "step_003"
+          },
+          {
+            "step": "step_003",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": "I am afraid I do not understand what you are asking, let me connect you to an agent."
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "connect_to_agent",
+              "response": {
+                "transfer_info": {
+                  "target": {}
+                },
+                "agent_available": {
+                  "message": "Let's send you to an available agent."
+                },
+                "agent_unavailable": {
+                  "message": "There are no agents available at this time. When one becomes available, we'll connect you."
+                },
+                "message_to_human_agent": ""
+              }
+            },
+            "variable": "step_003",
+            "condition": {
+              "eq": [
+                {
+                  "system_variable": "fallback_reason"
+                },
+                {
+                  "scalar": "No action matches"
+                }
+              ]
+            },
+            "next_step": "step_004"
+          },
+          {
+            "step": "step_004",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": "It seems this conversation would be best managed by a human agent. Let me connect you to one of our agents."
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "connect_to_agent",
+              "response": {
+                "transfer_info": {
+                  "target": {}
+                },
+                "agent_available": {
+                  "message": "Let's send you to an available agent."
+                },
+                "agent_unavailable": {
+                  "message": "There are no agents available at this time. When one becomes available, we'll connect you."
+                },
+                "message_to_human_agent": ""
+              }
+            },
+            "variable": "step_004",
+            "condition": {
+              "eq": [
+                {
+                  "system_variable": "fallback_reason"
+                },
+                {
+                  "scalar": "Danger word detected"
+                }
+              ]
+            },
+            "next_step": "step_005"
+          },
+          {
+            "step": "step_005",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": "It seems this conversation would be best managed by a human agent. Let me connect you to one of our agents."
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "connect_to_agent",
+              "response": {
+                "transfer_info": {
+                  "target": {}
+                },
+                "agent_available": {
+                  "message": "Let's send you to an available agent."
+                },
+                "agent_unavailable": {
+                  "message": "There are no agents available at this time. When one becomes available, we'll connect you."
+                },
+                "message_to_human_agent": ""
+              }
+            },
+            "variable": "step_005",
+            "condition": {
+              "eq": [
+                {
+                  "system_variable": "fallback_reason"
+                },
+                {
+                  "scalar": "Profanity detected"
+                }
+              ]
+            }
+          }
+        ],
+        "title": "Fallback",
+        "action": "fallback",
+        "boosts": [],
+        "handlers": [],
+        "condition": {
+          "intent": "fallback_connect_to_agent"
+        },
+        "variables": [
+          {
+            "title": "Topic return failed",
+            "variable": "digression_failure",
+            "data_type": "any"
+          },
+          {
+            "title": "I'm afraid I don't understand. I can connect you to an agent.",
+            "variable": "step_001",
+            "data_type": "any"
+          },
+          {
+            "title": "Sorry I couldn't assist you. I will connect you to an agent righ",
+            "variable": "step_002",
+            "data_type": "any"
+          },
+          {
+            "title": "I am afraid I do not understand what you are asking, let me conn",
+            "variable": "step_003",
+            "data_type": "any"
+          },
+          {
+            "title": "It seems this conversation would be best managed",
+            "variable": "step_004",
+            "data_type": "any"
+          },
+          {
+            "title": "Profanity - It seems this conversation",
+            "variable": "step_005",
+            "data_type": "any"
+          }
+        ],
+        "next_action": "run_always",
+        "disambiguation_opt_out": true
+      },
+      {
+        "type": "standard",
+        "steps": [
+          {
+            "step": "step_001",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text": "Welcome, how can I assist you?"
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "end_action"
+            },
+            "variable": "step_001"
+          }
+        ],
+        "title": "Greet customer",
+        "action": "welcome",
+        "boosts": [],
+        "handlers": [],
+        "condition": {
+          "expression": "welcome"
+        },
+        "variables": [
+          {
+            "variable": "step_001",
+            "data_type": "any"
+          }
+        ],
+        "next_action": "action_38928",
+        "disambiguation_opt_out": true
+      },
+      {
+        "type": "standard",
+        "steps": [
+          {
+            "step": "step_136",
+            "output": {
+              "generic": [
+                {
+                  "time": 2000,
+                  "typing": true,
+                  "response_type": "pause"
+                },
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "Hi, I am College Chatbot."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_136",
+            "next_step": "step_315"
+          },
+          {
+            "step": "step_315",
+            "output": {
+              "generic": [
+                {
+                  "time": 2000,
+                  "typing": true,
+                  "response_type": "pause"
+                },
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "How can I  help You?"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "question": {
+              "free_text": true
+            },
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_315"
+          }
+        ],
+        "title": "greetings",
+        "action": "action_10828",
+        "boosts": [],
+        "handlers": [],
+        "condition": {
+          "intent": "action_10828_intent_19103"
+        },
+        "variables": [
+          {
+            "title": "Hi, I am College Chatbot.",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_136",
+            "data_type": "any"
+          },
+          {
+            "title": "How can I help You?",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_315",
+            "data_type": "any"
+          }
+        ],
+        "launch_mode": "learning",
+        "next_action": "fallback",
+        "topic_switch": {
+          "allowed_from": true,
+          "allowed_into": true,
+          "never_return": false
+        },
+        "disambiguation_opt_out": false
+      },
+      {
+        "type": "standard",
+        "steps": [
+          {
+            "step": "step_569",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "There are 5 departments in our college"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "ECE",
+                      "value": {
+                        "input": {
+                          "text": "ECE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "CSE",
+                      "value": {
+                        "input": {
+                          "text": "CSE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "MECH",
+                      "value": {
+                        "input": {
+                          "text": "MECH"
+                        }
+                      }
+                    },
+                    {
+                      "label": "EEE",
+                      "value": {
+                        "input": {
+                          "text": "EEE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "IT",
+                      "value": {
+                        "input": {
+                          "text": "IT"
+                        }
+                      }
+                    }
+                  ],
+                  "response_type": "option",
+                  "repeat_on_reprompt": true
+                }
+              ]
+            },
+            "handlers": [
+              {
+                "type": "not_found",
+                "title": "validation_not_found_handler",
+                "output": {
+                  "generic": [
+                    {
+                      "values": [
+                        {
+                          "text_expression": {
+                            "concat": [
+                              {
+                                "scalar": "I didn't catch that. Select a valid option:"
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "response_type": "text",
+                      "selection_policy": "incremental"
+                    }
+                  ]
+                },
+                "handler": "validation_not_found_handler",
+                "resolver": {
+                  "type": "prompt_again"
+                },
+                "next_handler": "validation_not_found_max_tries_handler"
+              },
+              {
+                "type": "not_found_max_tries",
+                "title": "validation_not_found_max_tries_handler",
+                "handler": "validation_not_found_max_tries_handler",
+                "resolver": {
+                  "type": "fallback"
+                }
+              }
+            ],
+            "question": {
+              "entity": "entity_13610",
+              "max_tries": 3
+            },
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_569",
+            "next_step": "step_908"
+          },
+          {
+            "step": "step_908",
+            "output": {
+              "generic": [
+                {
+                  "time": 2000,
+                  "typing": true,
+                  "response_type": "pause"
+                },
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "Electronics and Communication Engineering (ECE) is a large branch of engineering that focuses on electronic devices and equipment. ECE professionals design, develop, and research electronic devices, and may also troubleshoot them. ECE also covers the study of circuits, communication systems, and how data is received. Students in ECE may learn how satellites, radio, television,"
+                          },
+                          {
+                            "scalar": " and audio transmission work."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_908",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_569"
+                },
+                {
+                  "value": "ECE",
+                  "from_entity": "entity_13610"
+                }
+              ]
+            },
+            "next_step": "step_398"
+          },
+          {
+            "step": "step_398",
+            "output": {
+              "generic": [
+                {
+                  "time": 2000,
+                  "typing": true,
+                  "response_type": "pause"
+                },
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "Computer Science Engineering (CSE) is a four-year undergraduate engineering degree that covers a range of topics related to computation. These topics include: programming languages, algorithm analysis, software, computer hardware, and program design."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_398",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_569"
+                },
+                {
+                  "value": "CSE",
+                  "from_entity": "entity_13610"
+                }
+              ]
+            },
+            "next_step": "step_455"
+          },
+          {
+            "step": "step_455",
+            "output": {
+              "generic": [
+                {
+                  "time": 2000,
+                  "typing": true,
+                  "response_type": "pause"
+                },
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "Mechanical engineering is a branch of engineering that focuses on systems in motion, including machines, energy conversion systems, materials, and equipment."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_455",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_569"
+                },
+                {
+                  "value": "MECH",
+                  "from_entity": "entity_13610"
+                }
+              ]
+            },
+            "next_step": "step_847"
+          },
+          {
+            "step": "step_847",
+            "output": {
+              "generic": [
+                {
+                  "time": 2000,
+                  "typing": true,
+                  "response_type": "pause"
+                },
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "Electrical and Electronics Engineering (EEE) is a branch of engineering that combines electrical and electronics engineering. It is a popular course that provides knowledge about electrical and machine technology, circuit analysis, telecommunication systems, power engineering, and related industries."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_847",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_569"
+                },
+                {
+                  "value": "EEE",
+                  "from_entity": "entity_13610"
+                }
+              ]
+            },
+            "next_step": "step_525"
+          },
+          {
+            "step": "step_525",
+            "output": {
+              "generic": [
+                {
+                  "time": 2000,
+                  "typing": true,
+                  "response_type": "pause"
+                },
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "The Information Technology (IT) branch can be a good choice for engineering because it offers many career options in a variety of fields, including finance, arts, medicine, and defense. IT specialists are also in demand at many IT firms across India."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_525",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_569"
+                },
+                {
+                  "value": "IT",
+                  "from_entity": "entity_13610"
+                }
+              ]
+            }
+          }
+        ],
+        "title": "Departments",
+        "action": "action_14874",
+        "boosts": [],
+        "handlers": [],
+        "condition": {
+          "intent": "action_14874_intent_28565"
+        },
+        "variables": [
+          {
+            "title": "Computer Science Engineering (CSE) is a four-year undergraduate ",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_398",
+            "data_type": "any"
+          },
+          {
+            "title": "Mechanical engineering is a branch of engineering that focuses o",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_455",
+            "data_type": "any"
+          },
+          {
+            "title": "The Information Technology (IT) branch can be a good choice for ",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_525",
+            "data_type": "any"
+          },
+          {
+            "title": "There are 5 departments in our college",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_569",
+            "data_type": "any"
+          },
+          {
+            "title": "Electrical and Electronics Engineering (EEE) is a branch of engi",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_847",
+            "data_type": "any"
+          },
+          {
+            "title": "Electronics and Communication Engineering (ECE) is a large branc",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_908",
+            "data_type": "any"
+          }
+        ],
+        "launch_mode": "learning",
+        "next_action": "action_10828",
+        "topic_switch": {
+          "allowed_from": true,
+          "allowed_into": true,
+          "never_return": false
+        },
+        "disambiguation_opt_out": false
+      },
+      {
+        "type": "standard",
+        "steps": [
+          {
+            "step": "step_862",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "Which Branch subjects you want?"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential",
+                  "repeat_on_reprompt": false
+                },
+                {
+                  "options": [
+                    {
+                      "label": "ECE",
+                      "value": {
+                        "input": {
+                          "text": "ECE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "CSE",
+                      "value": {
+                        "input": {
+                          "text": "CSE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "EEE",
+                      "value": {
+                        "input": {
+                          "text": "EEE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "MECH",
+                      "value": {
+                        "input": {
+                          "text": "MECH"
+                        }
+                      }
+                    },
+                    {
+                      "label": "IT",
+                      "value": {
+                        "input": {
+                          "text": "IT"
+                        }
+                      }
+                    }
+                  ],
+                  "response_type": "option",
+                  "repeat_on_reprompt": true
+                }
+              ]
+            },
+            "handlers": [
+              {
+                "type": "not_found",
+                "title": "validation_not_found_handler",
+                "output": {
+                  "generic": [
+                    {
+                      "values": [
+                        {
+                          "text_expression": {
+                            "concat": [
+                              {
+                                "scalar": "I didn't catch that. Select a valid option:"
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "response_type": "text",
+                      "selection_policy": "incremental"
+                    }
+                  ]
+                },
+                "handler": "validation_not_found_handler",
+                "resolver": {
+                  "type": "prompt_again"
+                },
+                "next_handler": "validation_not_found_max_tries_handler"
+              },
+              {
+                "type": "not_found_max_tries",
+                "title": "validation_not_found_max_tries_handler",
+                "handler": "validation_not_found_max_tries_handler",
+                "resolver": {
+                  "type": "fallback"
+                }
+              }
+            ],
+            "question": {
+              "entity": "entity_8763",
+              "max_tries": 3
+            },
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_862",
+            "next_step": "step_855"
+          },
+          {
+            "step": "step_855",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "ECE subjects given below:\n\n\n  - Electromagnetic theory\n  - Communication systems\n  - Electronic devices and circuits\n  - VLSI (Very Large Scale Integration) design\n  - Antennas and wave propagation\n  - Optical communication\n  - Digital signal processing\n  - Microwave engineering\n  - Wireless communication\n  - Network theory\n  - Power electronics"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_855",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_862"
+                },
+                {
+                  "value": "ECE",
+                  "from_entity": "entity_8763"
+                }
+              ]
+            },
+            "next_step": "step_109"
+          },
+          {
+            "step": "step_109",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "CSE subjects given below:\n\n\n  - Artificial Intelligence.\n  - Database Systems. \n  - Discrete Mathematics. \n  - Principles of Programming Languages. \n  - Operating Systems. \n  - Engineering Mechanics. \n  - Engineering Physics. \n  - Programming and Data Structures."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_109",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_862"
+                },
+                {
+                  "value": "CSE",
+                  "from_entity": "entity_8763"
+                }
+              ]
+            },
+            "next_step": "step_852"
+          },
+          {
+            "step": "step_852",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "EEE subjects given below:\n\n\n  - Rotating AC Machines.\n  - Digital Electronic Circuits.\n  - High Voltage Engineering.\n  - Microprocessor and Micro-Controller.\n  - Power Electronic Converters."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_852",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_862"
+                },
+                {
+                  "value": "EEE",
+                  "from_entity": "entity_8763"
+                }
+              ]
+            },
+            "next_step": "step_880"
+          },
+          {
+            "step": "step_880",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "MECH subjects are given below:\n\n\n  - Mathematics and Calculus.\n  - Thermodynamics.\n  - Fluid Mechanics.\n  - Mechanics of Materials.\n  - Materials Science.\n  - Engineering Graphics and CAD.\n  - Mechatronics.\n  - Engineering Thermodynamics."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_880",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_862"
+                },
+                {
+                  "value": "MECH",
+                  "from_entity": "entity_8763"
+                }
+              ]
+            },
+            "next_step": "step_531"
+          },
+          {
+            "step": "step_531",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "IT subjects are given below:\n\n\n  - Operating systems\n  - Computer networks\n  - Database management systems\n  - Software engineering\n  - Design and analysis of algorithms\n  - IT architecture and organization\n  - Electronics\n  - Foundations of IT systems\n  - Java programming and website design"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "end_action"
+            },
+            "variable": "step_531",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_862"
+                },
+                {
+                  "value": "IT",
+                  "from_entity": "entity_8763"
+                }
+              ]
+            }
+          }
+        ],
+        "title": "Subjects",
+        "action": "action_23200",
+        "boosts": [],
+        "handlers": [],
+        "condition": {
+          "intent": "action_23200_intent_32302"
+        },
+        "variables": [
+          {
+            "title": "CSE subjects given below: - Artificial Intelligence. - Database ",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_109",
+            "data_type": "any"
+          },
+          {
+            "title": "IT subjects are given below: - Operating systems - Computer netw",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_531",
+            "data_type": "any"
+          },
+          {
+            "title": "EEE subjects given below: - Rotating AC Machines. - Digital Elec",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_852",
+            "data_type": "any"
+          },
+          {
+            "title": "ECE subjects given below: - Electromagnetic theory - Communicati",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_855",
+            "data_type": "any"
+          },
+          {
+            "title": "Which Branch subjects you want?",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_862",
+            "data_type": "any"
+          },
+          {
+            "title": "MECH subjects are given below: - Mathematics and Calculus. - The",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_880",
+            "data_type": "any"
+          }
+        ],
+        "launch_mode": "learning",
+        "next_action": "action_14874",
+        "topic_switch": {
+          "allowed_from": true,
+          "allowed_into": true,
+          "never_return": false
+        },
+        "disambiguation_opt_out": false
+      },
+      {
+        "type": "standard",
+        "steps": [
+          {
+            "step": "step_259",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "Ok, which branch fees You want to know?"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential",
+                  "repeat_on_reprompt": false
+                },
+                {
+                  "options": [
+                    {
+                      "label": "ECE",
+                      "value": {
+                        "input": {
+                          "text": "ECE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "CSE",
+                      "value": {
+                        "input": {
+                          "text": "CSE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "EEE",
+                      "value": {
+                        "input": {
+                          "text": "EEE"
+                        }
+                      }
+                    },
+                    {
+                      "label": "MECH",
+                      "value": {
+                        "input": {
+                          "text": "MECH"
+                        }
+                      }
+                    },
+                    {
+                      "label": "IT",
+                      "value": {
+                        "input": {
+                          "text": "IT"
+                        }
+                      }
+                    }
+                  ],
+                  "response_type": "option",
+                  "repeat_on_reprompt": true
+                }
+              ]
+            },
+            "handlers": [
+              {
+                "type": "not_found",
+                "title": "validation_not_found_handler",
+                "output": {
+                  "generic": [
+                    {
+                      "values": [
+                        {
+                          "text_expression": {
+                            "concat": [
+                              {
+                                "scalar": "I didn't catch that. Select a valid option:"
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "response_type": "text",
+                      "selection_policy": "incremental"
+                    }
+                  ]
+                },
+                "handler": "validation_not_found_handler",
+                "resolver": {
+                  "type": "prompt_again"
+                },
+                "next_handler": "validation_not_found_max_tries_handler"
+              },
+              {
+                "type": "not_found_max_tries",
+                "title": "validation_not_found_max_tries_handler",
+                "handler": "validation_not_found_max_tries_handler",
+                "resolver": {
+                  "type": "fallback"
+                }
+              }
+            ],
+            "question": {
+              "entity": "entity_33483",
+              "max_tries": 3
+            },
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_259",
+            "next_step": "step_607"
+          },
+          {
+            "step": "step_607",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "|   **Duration**\n\n |**4 years**\n\n |\n| --- | --- |\n| Course Level\n\n |UG Degree\n\n |\n| Mode of Course\n\n |Full Time\n\n |\n| Total Tuition Fees\n\n |₹2.25 Lakh\n\n |\n| Average package\n\n |₹3.50 Lakh\n\n<br />\n\n\n\n |"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_607",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_259"
+                },
+                {
+                  "value": "ECE",
+                  "from_entity": "entity_33483"
+                }
+              ]
+            },
+            "next_step": "step_922"
+          },
+          {
+            "step": "step_922",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "| **TUITION**\n\n |**180,000**\n\n |**180,000**\n\n |\n| --- | --- |\n| ICT SERVICES - (PER YEAR)\n\n |7,000\n\n |0\n\n |\n| EXAMINATION (PER UNIT @1000)\n\n |8,000\n\n |6,000\n\n |\n| REGISTRATION (PER SEMESTER@2250)\n\n |2,250\n\n |2,250\n\n |"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_922",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_259"
+                },
+                {
+                  "value": "CSE",
+                  "from_entity": "entity_33483"
+                }
+              ]
+            },
+            "next_step": "step_781"
+          },
+          {
+            "step": "step_781",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "| **Duration**\n\n |**4 years**\n\n |\n| --- | --- |\n| Mode of Course\n\n |Full Time\n\n |\n| Total Tuition Fees\n\n |**₹2.25 Lakh**\n\n |\n| Average package\n\n |₹3.50 Lakh\n\n |\n| Official Website\n\n |Go to Website\n\n<br />\n\n\n\n |"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_781",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_259"
+                },
+                {
+                  "value": "EEE",
+                  "from_entity": "entity_33483"
+                }
+              ]
+            },
+            "next_step": "step_925"
+          },
+          {
+            "step": "step_925",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "| <br />\n\n\n\n |<br />\n\n\n\n |\n| --- | --- |\n| **Fee components**\n\n |**Amount (4 years)**\n\n |\n| Tuition Fees Tuition fee is calculated on the basis of 1st year/semester. Actual amount may vary. The fees might include components other than tuition fees. Mentioned fee is as per AP EAPCET.\n\n |₹ 2.25 Lakh\n\n |\n| Total fee\n\n |₹ 2.25 Lakh\n\n |"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "continue"
+            },
+            "variable": "step_925",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_259"
+                },
+                {
+                  "value": "MECH",
+                  "from_entity": "entity_33483"
+                }
+              ]
+            },
+            "next_step": "step_597"
+          },
+          {
+            "step": "step_597",
+            "output": {
+              "generic": [
+                {
+                  "values": [
+                    {
+                      "text_expression": {
+                        "concat": [
+                          {
+                            "scalar": "BTech IT The average fee for a BTech IT course can range from Rs. 4,000 to Rs. 10 lakhs per year, depending on the university."
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "response_type": "text",
+                  "selection_policy": "sequential"
+                }
+              ]
+            },
+            "handlers": [],
+            "resolver": {
+              "type": "end_action"
+            },
+            "variable": "step_597",
+            "condition": {
+              "eq": [
+                {
+                  "variable": "step_259"
+                },
+                {
+                  "value": "IT",
+                  "from_entity": "entity_33483"
+                }
+              ]
+            }
+          }
+        ],
+        "title": "fee structure",
+        "action": "action_38928",
+        "boosts": [],
+        "handlers": [],
+        "condition": {
+          "intent": "action_38928_intent_31783"
+        },
+        "variables": [
+          {
+            "title": "Ok, which branch fees You want to know?",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_259",
+            "data_type": "any"
+          },
+          {
+            "title": "BTech IT The average fee for a BTech IT course can range from Rs",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_597",
+            "data_type": "any"
+          },
+          {
+            "title": "| **Duration** |**4 years** | | --- | --- | | Course Level |UG D",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_607",
+            "data_type": "any"
+          },
+          {
+            "title": "| **Duration** |**4 years** | | --- | --- | | Mode of Course |Fu",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_781",
+            "data_type": "any"
+          },
+          {
+            "title": "| **TUITION** |**180,000** |**180,000** | | --- | --- | | ICT SE",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_922",
+            "data_type": "any"
+          },
+          {
+            "title": "| <br /> |<br /> | | --- | --- | | **Fee components** |**Amount ",
+            "privacy": {
+              "enabled": false
+            },
+            "variable": "step_925",
+            "data_type": "any"
+          }
+        ],
+        "launch_mode": "learning",
+        "next_action": "action_23200",
+        "topic_switch": {
+          "allowed_from": true,
+          "allowed_into": true,
+          "never_return": false
+        },
+        "disambiguation_opt_out": false
+      }
+    ],
+    "intents": [
+      {
+        "intent": "action_10828_intent_19103",
+        "examples": [
+          {
+            "text": "namasthe"
+          },
+          {
+            "text": "Hello"
+          },
+          {
+            "text": "Hi"
+          },
+          {
+            "text": "Hai"
+          },
+          {
+            "text": "Hola"
+          },
+          {
+            "text": "Whatsapp"
+          },
+          {
+            "text": "greetings"
+          }
+        ]
+      },
+      {
+        "intent": "fallback_connect_to_agent",
+        "examples": [
+          {
+            "text": "Call agent"
+          },
+          {
+            "text": "I would like to speak to a human"
+          },
+          {
+            "text": "Can I connect to an agent?"
+          },
+          {
+            "text": "I would like to speak to someone"
+          },
+          {
+            "text": "Agent help"
+          }
+        ],
+        "description": "Please transfer me to an agent"
+      },
+      {
+        "intent": "action_14874_intent_28565",
+        "examples": [
+          {
+            "text": "How many departments are there"
+          },
+          {
+            "text": "Departments"
+          },
+          {
+            "text": "best department"
+          },
+          {
+            "text": "courses available"
+          },
+          {
+            "text": "courses please"
+          },
+          {
+            "text": "Name of the branches"
+          },
+          {
+            "text": "departments availiable"
+          }
+        ]
+      },
+      {
+        "intent": "action_23200_intent_32302",
+        "examples": [
+          {
+            "text": "Subjects"
+          },
+          {
+            "text": "How many subjects"
+          },
+          {
+            "text": "subject name"
+          }
+        ]
+      },
+      {
+        "intent": "action_38928_intent_31783",
+        "examples": [
+          {
+            "text": "fee structure"
+          },
+          {
+            "text": "fee"
+          },
+          {
+            "text": "fees"
+          },
+          {
+            "text": "charges"
+          }
+        ]
+      }
+    ],
+    "entities": [
+      {
+        "entity": "danger_words",
+        "values": [],
+        "fuzzy_match": false
+      },
+      {
+        "entity": "entity_33483",
+        "values": [
+          {
+            "type": "synonyms",
+            "value": "IT",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "ECE",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "CSE",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "EEE",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "MECH",
+            "synonyms": []
+          }
+        ],
+        "fuzzy_match": true
+      },
+      {
+        "entity": "entity_13610",
+        "values": [
+          {
+            "type": "synonyms",
+            "value": "EEE",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "IT",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "ECE",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "CSE",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "MECH",
+            "synonyms": []
+          }
+        ],
+        "fuzzy_match": true
+      },
+      {
+        "entity": "entity_8763",
+        "values": [
+          {
+            "type": "synonyms",
+            "value": "CSE",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "IT",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "EEE",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "MECH",
+            "synonyms": []
+          },
+          {
+            "type": "synonyms",
+            "value": "ECE",
+            "synonyms": []
+          }
+        ],
+        "fuzzy_match": true
+      },
+      {
+        "entity": "sys-yes-no",
+        "values": []
+      },
+      {
+        "entity": "profane_words",
+        "values": [],
+        "fuzzy_match": false
+      }
+    ],
+    "metadata": {
+      "api_version": {
+        "major_version": "v2",
+        "minor_version": "2018-11-08"
+      },
+      "skill": {
+        "counts": {
+          "actions": 8,
+          "intents": 5,
+          "entities": 6,
+          "data_types": 0,
+          "collections": 0,
+          "global_variables": 1
+        }
+      }
+    },
+    "variables": [
+      {
+        "title": "Name",
+        "privacy": {
+          "enabled": false
+        },
+        "variable": "Name",
+        "data_type": "string",
+        "description": ""
+      }
+    ],
+    "data_types": [],
+    "collections": [],
+    "counterexamples": [],
+    "system_settings": {
+      "variable": {
+        "format": {
+          "time": {
+            "pattern": "short"
+          },
+          "currency": {
+            "fraction_digits": 2
+          }
+        }
+      },
+      "off_topic": {
+        "enabled": true
+      },
+      "auto_learn": {
+        "apply": true
+      },
+      "topic_switch": {
+        "enabled": true,
+        "messages": {
+          "enable_confirmation": true,
+          "confirmation_failure": {
+            "generic": [
+              {
+                "values": [
+                  {
+                    "text_expression": {
+                      "concat": [
+                        {
+                          "scalar": "I'm sorry, I did not catch that, please confirm."
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "response_type": "text",
+                "selection_policy": "sequential"
+              }
+            ]
+          },
+          "confirmation_request": {
+            "generic": [
+              {
+                "values": [
+                  {
+                    "text_expression": {
+                      "concat": [
+                        {
+                          "scalar": "Do you want to continue with the previous topic: "
+                        },
+                        {
+                          "system_variable": "digressed_from"
+                        },
+                        {
+                          "scalar": "?"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "response_type": "text",
+                "selection_policy": "sequential"
+              },
+              {
+                "options": [
+                  {
+                    "label": "Yes",
+                    "value": {
+                      "input": {
+                        "text": "Yes"
+                      }
+                    }
+                  },
+                  {
+                    "label": "No",
+                    "value": {
+                      "input": {
+                        "text": "No"
+                      }
+                    }
+                  }
+                ],
+                "response_type": "option",
+                "repeat_on_reprompt": true
+              }
+            ]
+          }
+        },
+        "max_tries": 3
+      },
+      "generative_ai": {
+        "slot_filling": {
+          "enabled": false
+        }
+      },
+      "disambiguation": {
+        "prompt": "Did you mean:",
+        "enabled": true,
+        "randomize": true,
+        "max_suggestions": 5,
+        "suggestion_text_policy": "title",
+        "none_of_the_above_prompt": "None of the above",
+        "use_connect_to_support_prompt": "Connect to support",
+        "single_answer_clarification_prompt": "Something else"
+      },
+      "search_routing": {
+        "target": "conversational_search"
+      },
+      "spelling_auto_correct": true
+    },
+    "learning_opt_out": false,
+    "language": "en"
+  },
+  "description": "created for assistant 1efb197d-5496-4c8d-b216-7c7ad7805db2",
+  "dialog_settings": {
+    "source_assistant": "361c417b-c1ef-4a69-a6b4-a842851ddee0"
+  },
+  "created": "2024-08-03T13:01:59.372Z",
+  "updated": "2024-08-03T13:01:59.372Z",
+  "snapshot": "1",
+  "assistant_id": "1efb197d-5496-4c8d-b216-7c7ad7805db2",
+  "assistant_references": [
+    {
+      "name": "College Bot",
+      "assistant_id": "361c417b-c1ef-4a69-a6b4-a842851ddee0",
+      "skill_reference": "actions skill"
+    }
+  ]
+}
